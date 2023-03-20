@@ -1,0 +1,2261 @@
+openapi: 3.0.0
+info:
+  description: Consolidated page for the following API services
+  version: 1.0.0
+  title: Trace And Alert API
+servers:
+  - url: 'https://trace.bancnet.fcs.mastercard.com'
+    description: Production server
+  - url: 'https://trace.test.fcs.mastercard.com'
+    description: MTF server
+tags:
+  - name: Feedback
+    description: >-
+      These endpoints allow you to provide feedback on account, transaction and
+      network alerts.
+  - name: Trace
+    description: >-
+      These endpoints allow you to trace the proceeds of financial crime through
+      the payments network.
+  - name: Alert
+    description: >-
+      These endpoints allow you to retrieve alerts on suspicious accounts,
+      transactions and dispersion networks.
+  - name: Match
+    description: This endpoint allows you to match transactions without an id.
+paths:
+  /feedback:
+    post:
+      tags:
+        - Feedback
+      summary: Provide feedback on financial crime.
+      description: >-
+        Use this api to submit feedback about alerts. The feedback you provide
+        may trigger a new set of alerts which will be made available to other
+        participants.
+      operationId: postFeedback
+      requestBody:
+         $ref: "#/components/requestBodies/Feedback"
+      parameters: []     
+      responses:
+        '200':
+          $ref: "#/components/responses/PostFeedbackResponse"
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+               $ref: "#/components/schemas/BadRequest"
+        '500':
+          description: Internal server error
+  '/financial-crime/networks/{txn_id}':
+    get:
+      operationId: getNetworkById
+      tags:
+        - Trace
+      summary: Trace the proceeds of financial crime through the payments network
+      description: This endpoint allows you to retrieve the dispersion networks relating to the provided transaction. This includes the submitted transaction as well as the subsequent movement of funds, and possibly fund movement previous to the supplied transaction. Calling this endpoint may generate alerts for other involved participants.
+      parameters:
+        - $ref: "#/components/parameters/TransactionIdentifier"
+        - $ref: "#/components/parameters/TraceType"
+      responses:
+        '200':
+          $ref: "#/components/responses/GetNetworkByIdResponseTrace"
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+               $ref: "#/components/schemas/BadRequest"
+        '500':
+          description: Internal server error
+  '/financial-crime/visualisations/networks/{network_alert_id}':
+    get:
+      operationId: getVizById
+      tags:
+        - Trace
+      summary: Returns the dispersion network visualization for a given networkAlertID.
+      description: >-
+        This endpoint returns the dispersion network visualisation asset for the
+        participant accounts.
+      parameters:
+        - $ref: "#/components/parameters/NetworkAlertIdTrace"
+        - $ref: "#/components/parameters/VizFormat"
+        - $ref: "#/components/parameters/VizWidth"
+        - $ref: "#/components/parameters/VizHeight"
+        - $ref: "#/components/parameters/VizLegend"
+        - $ref: "#/components/parameters/VizAxis"
+        - $ref: "#/components/parameters/VizColour"
+      responses:
+        '200':
+          $ref: "#/components/responses/GetVizByIdResponseTrace"
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+               $ref: "#/components/schemas/BadRequest"
+        '500':
+          description: Internal server error
+  /alerts/accounts:
+    get:
+      tags:
+        - Alert
+      summary: Retrieve a list of account alerts.
+      description: >-
+        This endpoint allows you to retrieve a set of account alerts filtered by
+        a comprehensive set of optional parameters. Calling without any
+        parameters will return a list of the most recent account alerts. This
+        endpoint can be called regularly to detect new alerts as they are
+        generated or on an ad-hoc basis to power an interface.
+      operationId: getAccountAlerts
+      parameters:
+        - $ref: "#/components/parameters/SinceDate"
+        - $ref: "#/components/parameters/LimitAlerts"
+        - $ref: "#/components/parameters/PaginationToken"
+        - $ref: "#/components/parameters/Filter"
+      responses:
+        '200':
+          $ref: "#/components/responses/GetAccountAlertsResponseAlert"
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+               $ref: "#/components/schemas/BadRequest"
+        '500':
+          description: Internal server error
+  /alerts/transactions:
+    get:
+      tags:
+        - Alert
+      summary: Retrieve a list of transaction alerts
+      description: >-
+        This endpoint allows you to retrieve a set of transaction alerts fitting
+        various parameters.
+      operationId: getTransactionAlerts
+      parameters:
+        - $ref: "#/components/parameters/SinceDate"
+        - $ref: "#/components/parameters/LimitAlerts"
+        - $ref: "#/components/parameters/PaginationToken"
+        - $ref: "#/components/parameters/Filter"
+      responses:
+        '200':
+          $ref: "#/components/responses/GetTransactionAlertsResponseAlert"
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+               $ref: "#/components/schemas/BadRequest"
+        '500':
+          description: Internal server error
+  /alerts/networks:
+    get:
+      tags:
+        - Alert
+      summary: Retrieve a list of dispersion network alerts
+      description: >-
+        This endpoint allows you to retrieve a set of dispersion network alerts
+        fitting various parameters.
+      operationId: getNetworkAlerts
+      parameters:
+        - $ref: "#/components/parameters/SinceDate"
+        - $ref: "#/components/parameters/LimitAlerts"
+        - $ref: "#/components/parameters/PaginationToken"
+        - $ref: "#/components/parameters/Filter"
+        - $ref: "#/components/parameters/IncludeAllAlerts"
+      responses:
+        '200':
+          $ref: "#/components/responses/GetNetworkAlertsResponseAlert"
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+               $ref: "#/components/schemas/BadRequest"
+        '500':
+          description: Internal server error
+  '/alerts/accounts/{account_alert_id}':
+    get:
+      tags:
+        - Alert
+      summary: Retrieves the account alert for a given alertID.
+      description: >-
+        This endpoint allows you to retrieve an account alert for a given
+        alertID.
+      operationId: getAccountAlertByAlertID
+      parameters:
+        - $ref: "#/components/parameters/AccountAlertId"
+      responses:
+        '200':
+          $ref: "#/components/responses/GetAccountAlertByAlertIDResponseAlert"
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+               $ref: "#/components/schemas/BadRequest"
+        '500':
+          description: Internal server error
+  '/alerts/transactions/{txn_alert_id}':
+    get:
+      tags:
+        - Alert
+      summary: Retrieves the transaction alert for a given alertID
+      description: >-
+        This endpoint allows you to retrieve a transaction alert for a given
+        alertID
+      operationId: getTransactionAlertByAlertID
+      parameters:
+        - $ref: "#/components/parameters/TransactionAlertId"
+      responses:
+        '200':
+          $ref: "#/components/responses/GetTransactionAlertByAlertIDResponseAlert"
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+               $ref: "#/components/schemas/BadRequest"
+        '500':
+          description: Internal server error
+  '/alerts/networks/{network_alert_id}':
+    get:
+      tags:
+        - Alert
+      summary: Retrieves the dispersion network alert for a given alertID
+      description: >-
+        This endpoint allows you to retrieve a dispersion network alert for a
+        given alertID
+      operationId: getNetworkAlertByAlertID
+      parameters:
+        - $ref: "#/components/parameters/NetworkAlertIdAlert"
+        - $ref: "#/components/parameters/IncludeAllAlerts"
+      responses:
+        '200':
+          $ref: "#/components/responses/GetNetworkAlertByAlertIDResponseAlert"
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+               $ref: "#/components/schemas/BadRequest"
+        '500':
+          description: Internal server error
+  /transaction-id-matches:
+    post:
+      tags:
+        - Match
+      summary: >-
+        Returns the transaction IDs that are possible matches for the supplied
+        transaction details
+      description: >-
+        This endpoint evaluates the supplied transaction details and returns a
+        ranked set of transaction IDs that match those details as closely as
+        possible. Note that the supplied transaction details can return multiple
+        transactions. The response matches depends on the supplied service 4
+      operationId: matchTransaction
+      requestBody:
+        $ref: "#/components/requestBodies/TransactionIDMatches"
+      responses:
+        '200':
+          $ref: "#/components/responses/MatchTransactionResponseMatchAPI"
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+               $ref: "#/components/schemas/BadRequest"
+        '500':
+          description: Internal server error
+components:
+  parameters:
+    SinceDate:
+      name: since
+      description: >-
+        List account/transaction/network alerts generated since the supplied
+        date, specified as a ISO8601/RFC3339 date-time.
+      required: false
+      example: '2017-07-21T17:32:28.000Z'
+      in: query
+      schema:
+        type: string
+        format: date-time
+    LimitAlerts:
+      name: limit
+      description: Limit the last n account/transaction/network alerts
+      required: false
+      example: 200
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 999
+    PaginationToken:
+      name: pagination_token
+      description: Parameter to be used to retrieve next or previous set of alerts
+      required: false
+      example: 'asc:1617275388000:2SKqogOYg2UQRnP1a4oJ66TFHcvfpZpt'
+      in: query
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 256
+    Filter:
+      name: filter
+      description: >-
+        The filter query parameter provides an ability to write filter
+        expressions for alert records. By supplying dimensions with comparison
+        operators and expressions, the alerts response can be restricted for
+        certain records
+      required: false
+      examples:
+        account:
+          value: 'owningBank==934,muleScore>=0.7'
+          summary: >-
+            Filter account alerts where the owning bank id is 934 and the mule
+            score greater than or equal to 0.7.
+        transaction:
+          value: 'value<=10000,muleScore<0.7'
+          summary: >-
+            Filter transaction alerts where the value is less than or equal to
+            10000 and mule score less than 0.7.
+        network:
+          value: 'dwellTime>=5m5s,Generation<=6'
+          summary: >-
+            Filter network alerts so the dwell time is greater than or equal to
+            5m5s and the Generation is less than or equal to 6.
+      in: query
+      schema:
+        type: string
+    IncludeAllAlerts:
+      name: include_all_alerts
+      description: >-
+        Whether to display non owning masked transaction alerts in the
+        dispersion network
+      required: false
+      example: true
+      in: query
+      schema:
+        type: boolean
+        default: false
+    AccountAlertId:
+      name: account_alert_id
+      description: Account alert ID to be retrieved
+      required: true
+      example: 86781fb3-7854-4794-82e6-ead8a08c11f9
+      in: path
+      schema:
+        $ref: "#/components/schemas/EventIdentifierAlert"
+    TransactionAlertId:
+      name: txn_alert_id
+      description: Transaction alert ID to be retrieved
+      required: true
+      example: 86781fb3-7854-4794-82e6-ead8a08c11f9
+      in: path
+      schema:
+        $ref: "#/components/schemas/EventIdentifierAlert"
+    NetworkAlertIdAlert:
+      name: network_alert_id
+      description: Dispersion network alert ID to be retrieved
+      required: true
+      example: 86781fb3-7854-4794-82e6-ead8a08c11f9
+      in: path
+      schema:
+        $ref: "#/components/schemas/EventIdentifierAlert"
+    TransactionIdentifier:
+      name: txn_id
+      description: Unique identifier of transaction to be traced
+      required: true
+      example: 2b588f38-d1bc-40bf-85fc-91397bc98465
+      in: path
+      schema:
+        $ref: "#/components/schemas/TransactionIdentifierTrace"
+    TraceType:
+      name: type
+      description: The type of transaction used to trigger the trace
+      required: true
+      example: FRAUD
+      in: query
+      schema:
+        $ref: "#/components/schemas/TraceTypeTrace"
+    NetworkAlertIdTrace:
+      name: network_alert_id
+      description: Dispersion network alertID to be visualized.
+      required: true
+      example: e99a18c428cb38d5f260853678922e03
+      in: path
+      schema:
+        $ref: "#/components/schemas/EventIdentifierTrace"
+    VizFormat:
+      name: format
+      description: Format of the returned asset.
+      required: false
+      example: SVG
+      in: query
+      schema:
+        $ref: "#/components/schemas/VizFormatTrace"
+    VizWidth:
+      name: width
+      description: Width(px) of the returned asset.
+      required: false
+      example: 1280
+      in: query
+      schema:
+        $ref: "#/components/schemas/VizWidthTrace"
+    VizHeight:
+      name: height
+      description: Height(px) of the returned asset
+      required: false
+      example: 720
+      in: query
+      schema:
+        $ref: "#/components/schemas/VizHeightTrace"
+    VizLegend:
+      name: legend
+      description: Boolean filter whether to return legend (true/false).
+      required: false
+      example: true
+      in: query
+      schema:
+        $ref: "#/components/schemas/VizLegendTrace"
+    VizAxis:
+      name: type
+      description: Type of X axis
+      required: false
+      example: SEQ
+      in: query
+      schema:
+        $ref: "#/components/schemas/VizAxisTrace"
+    VizColour:
+      name: colour_mode
+      description: Colour palette of the returned asset.
+      required: false
+      example: LIGHT
+      in: query
+      schema:
+        $ref: "#/components/schemas/VizColourTrace"
+  requestBodies:
+    Feedback:
+      description: Feedback provided on the specified alert ID
+      required: true
+      content:
+        application/json:
+         schema:
+           $ref: "#/components/schemas/Feedback"
+    TransactionIDMatches:
+      description: "Response provided to match transactions without an id."
+      required: true
+      content:
+        application/json:
+          schema:
+           $ref: "#/components/schemas/TransactionIDMatchesBody"       
+  responses:
+    UnauthorisedErrorResponse:
+      description: Unauthorised - your request could not be authorised.
+      content:
+        application/json: 
+          schema:
+            $ref: "#/components/schemas/ErrorWrapper"
+          examples:
+            UnauthorisedExample:
+              $ref: "#/components/examples/UnauthorisedExample"
+    RateLimitErrorResponse:
+      description: Rate Limited - Exceed the designated rate limit.
+      content:
+        application/json: 
+          schema:
+            $ref: "#/components/schemas/ErrorWrapper"
+          examples:
+            RateLimitExample:
+              $ref: "#/components/examples/RateLimitExample"
+    PostFeedbackResponse:
+      description: Feedback has been processed
+      content:
+        application/json: 
+          schema:
+            $ref: "#/components/schemas/TraceFeedback"
+    BadRequestErrorResponseFeedback:
+      description: Bad Request.
+      content:
+        application/json: 
+          schema:
+            $ref: "#/components/schemas/ErrorWrapper"
+          examples:
+            BadRequestExample:
+              $ref: "#/components/examples/BadRequestExampleFeedback"
+    ForbiddenErrorResponseFeedback:
+      description: Forbidden - you do not have permission to make this request.
+      content:
+        application/json: 
+          schema:
+            $ref: "#/components/schemas/ErrorWrapper"
+          examples:
+            AccessForbiddenExample:
+              $ref: "#/components/examples/AccessForbiddenExample"
+            ConsumerForbiddenExample:
+              $ref: "#/components/examples/ConsumerForbiddenExampleFeedback"
+            ForbiddenNotFoundExample:
+              $ref: "#/components/examples/ConsumerForbiddenNotFoundExampleFeedback"
+    NotFoundErrorResponseFeedback:
+      description: Not found - the url path does not exist or alert id not found.
+      content:
+        application/json: 
+          schema:
+            $ref: "#/components/schemas/ErrorWrapper"
+          examples:
+            NotFoundExample:
+              $ref: "#/components/examples/NotFoundExample"
+            TransactionNotFoundExample:
+              $ref: "#/components/examples/AlertIdNotFoundExampleFeedback"
+    MethodNotAllowedErrorResponseFeedback:
+      description: Method not allowed - http method not supported.
+      content:
+        application/json: 
+          schema:
+            $ref: "#/components/schemas/ErrorWrapper"
+          examples:
+            MethodNotAllowedExample:
+              $ref: "#/components/examples/MethodNotAllowedExampleFeedback"
+    ConflictErrorResponseFeedback:
+      description: Conflict - Alert ID does not match the specified entity
+      content:
+        application/json: 
+          schema:
+            $ref: "#/components/schemas/ErrorWrapper"
+          examples:
+            ConflictExample:
+              $ref: "#/components/examples/ConflictExampleFeedback"
+    UnsupportedMediaTypeErrorResponseFeedback:
+      description: Unsupported media type - Only application/json is allowed.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorWrapper"
+          examples:
+            UnsupportedMediaTypeExample:
+              $ref: "#/components/examples/UnsupportedMediaTypeExampleFeedback"
+    UnprocessableEntityErrorResponseFeedback:
+      description: Unprocessable Entity - Failed to process the body.
+      content:
+        application/json: 
+          schema:
+            $ref: "#/components/schemas/ErrorWrapper"
+          examples:
+            UnprocessableEntityExample:
+              $ref: "#/components/examples/UnprocessableEntityExampleFeedback"
+    MatchTransactionResponseMatchAPI:
+      description: Transaction has been matched
+      content:
+        application/json: 
+          schema:
+            $ref: "#/components/schemas/TransactionIDMatchesMatchAPI"
+    BadRequestErrorResponseMatchAPI:
+      description: Bad Request.
+      content:
+        application/json: 
+          schema:
+            $ref: "#/components/schemas/ErrorWrapper"
+          examples:
+            BadRequestExample:
+              $ref: "#/components/examples/BadRequestExampleMatchAPI"
+    ForbiddenErrorResponseMatchAPI:
+      description: Forbidden - you do not have permission to make this request.
+      content:
+        application/json: 
+          schema:
+            $ref: "#/components/schemas/ErrorWrapper"
+          examples:
+            AccessForbiddenExample:
+              $ref: "#/components/examples/AccessForbiddenExample"
+            ConsumerForbiddenExample:
+              $ref: "#/components/examples/ConsumerForbiddenExampleMatchAPI"
+            ForbiddenNotFoundExample:
+              $ref: "#/components/examples/ConsumerForbiddenNotFoundExampleMatchAPI"
+    NotFoundErrorResponseMatchAPI:
+      description: Not found - the url path does not exist.
+      content:
+        application/json: 
+          schema:
+            $ref: "#/components/schemas/ErrorWrapper"
+          examples:
+            NotFoundExample:
+              $ref: "#/components/examples/NotFoundExample"
+    MethodNotAllowedErrorResponseMatchAPI:
+      description: Method not allowed - http method not supported.
+      content:
+        application/json: 
+          schema:
+            $ref: "#/components/schemas/ErrorWrapper"
+          examples:
+            MethodNotAllowedExample:
+              $ref: "#/components/examples/MethodNotAllowedExampleMatchAPI"
+    UnsupportedMediaTypeErrorResponseMatchAPI:
+      description: Unsupported media type - Only application/json is allowed.
+      content:
+        application/json: 
+          schema:
+            $ref: "#/components/schemas/ErrorWrapper"
+          examples:
+            UnsupportedMediaTypeExample:
+              $ref: "#/components/examples/UnsupportedMediaTypeExampleMatchAPI"
+    UnprocessableEntityErrorResponseMatchAPI:
+      description: Unprocessable Entity - Failed to process the body.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorWrapper"
+          examples:
+            UnprocessableEntityExample:
+             $ref: "#/components/examples/UnprocessableEntityExampleMatchAPI"
+    GetAccountAlertsResponseAlert:
+      description: Account alert has been processed
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/AccountAlerts"
+    GetTransactionAlertsResponseAlert:
+      description: Transaction alert has been processed
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/TransactionAlerts"
+    GetNetworkAlertsResponseAlert:
+      description: Network alert has been processed
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/NetworkAlerts"
+    GetAccountAlertByAlertIDResponseAlert:
+      description: Account alert by id has been processed
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/AccountAlert"
+    GetTransactionAlertByAlertIDResponseAlert:
+      description: Transaction alert by id has been processed
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/TransactionAlert"
+    GetNetworkAlertByAlertIDResponseAlert:
+      description: Network alert by id has been processed
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/NetworkAlert"
+    BadRequestErrorResponseAlert:
+      description: Bad Request.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorWrapper"
+          examples:
+            BadRequestExample:
+              $ref: "#/components/examples/BadRequestExampleAlert"
+    ForbiddenErrorResponseAlert:
+      description: Forbidden - you do not have permission to make this request.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorWrapper"
+          examples:
+            AccessForbiddenExample:
+              $ref: "#/components/examples/AccessForbiddenExample"
+            ConsumerForbiddenExample:
+              $ref: "#/components/examples/ConsumerForbiddenExampleAlert"
+            ForbiddenNotFoundExample:
+              $ref: "#/components/examples/ConsumerForbiddenNotFoundExampleAlert"
+    NotFoundErrorResponseAlert:
+      description: Not found - the url path does not exists or transaction not found.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorWrapper"
+          examples:
+            NotFoundExample:
+              $ref: "#/components/examples/NotFoundExample"
+            AlertIdNotFoundExample:
+              $ref: "#/components/examples/AlertIdNotFoundExampleAlert"
+    MethodNotAllowedErrorResponseAlert:
+      description: Method not allowed - http method not supported.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorWrapper"
+          examples:
+            MethodNotAllowedExample:
+              $ref: "#/components/examples/MethodNotAllowedExampleAlert"
+    GetNetworkByIdResponseTrace:
+      description: Transaction has been traced.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/TracedNetworks"
+    GetVizByIdResponseTrace:
+      description: Visualisation has been created.
+      content:
+        application/pdf:
+          schema:
+            format: binary
+        image/svg+xml:
+          schema:
+            format: string
+    BadRequestErrorResponseTrace:
+      description: Bad Request.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorWrapper"
+          examples:
+            BadRequestExample:
+              $ref: "#/components/examples/BadRequestExampleTrace"
+    ForbiddenErrorResponseTrace:
+      description: Forbidden - you do not have permission to make this request.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorWrapper"
+          examples:
+            AccessForbiddenExample:
+              $ref: "#/components/examples/AccessForbiddenExample"
+            ConsumerForbiddenExample:
+              $ref: "#/components/examples/ConsumerForbiddenExampleTrace"
+            ForbiddenNotFoundExample:
+              $ref: "#/components/examples/ConsumerForbiddenNotFoundExampleTrace"
+    NotFoundErrorResponseTrace:
+      description: Not found - the url path does not exists or transaction not found.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorWrapper"
+          examples:
+            NotFoundExample:
+              $ref: "#/components/examples/NotFoundExample"
+            TransactionNotFoundExample:
+              $ref: "#/components/examples/TransactionNotFoundExampleTrace"
+    MethodNotAllowedErrorResponseTrace:
+      description: Method not allowed - http method not supported.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorWrapper"
+          examples:
+            MethodNotAllowedExample:
+              $ref: "#/components/examples/MethodNotAllowedExampleTrace"
+  schemas:
+    ErrorWrapper:
+      description: A top level object for errors.
+      type: object
+      required:
+        - Errors
+      properties:
+        Errors:
+          $ref: "#/components/schemas/Errors"
+    Errors:
+      description: Object that contains the list of errors.
+      type: object
+      required:
+        - Error
+      properties:
+        Error:
+          $ref: "#/components/schemas/ErrorList"
+    ErrorList:
+      description: The list of errors.
+      type: array
+      minItems: 1
+      items:
+        $ref: "#/components/schemas/Error"
+    Error:
+      description: A single error.
+      type: object
+      properties: 
+        Source:
+          type: string
+          description: Information about where the error happened.
+          example:
+            - FEEDBACK_FINANCIAL_CRIME
+            - MATCH_FINANCIAL_CRIME
+            - ALERT_FINANCIAL_CRIME
+            - TRACE_FINANCIAL_CRIME
+          minLength: 1
+          maxLength: 1000
+        ReasonCode:
+          type: string
+          description: The http error code in words.
+          example: BAD_REQUEST
+          minLength: 1
+          maxLength: 100
+        Description:
+          type: string
+          description: A description of the error.
+          example: We could not handle your request.
+          minLength: 1
+          maxLength: 1000
+        Recoverable:
+          type: boolean
+          description: Indicates if the request can be presented again for processing.
+          example: false
+        Details:
+          type: string
+          description: More details about the error.
+          example: The request contains a bad payload
+          minLength: 1
+          maxLength: 10000
+    Feedback:
+      type: object
+      required:
+        - alertID
+        - alertType
+        - entityID
+        - decisionDate
+        - feedback
+      properties:
+       alertID:
+        type: string
+        description: Reference to the original alertID on which feedback is based.
+        example: e99a18c428cb38d5f260853678922e03
+        minLength: 10
+        maxLength: 100
+       alertType:
+        type: string
+        description: Type of alert provided by the trace financial crime api.
+        example: ACCOUNT_ALERT
+        enum:
+          - ACCOUNT_ALERT
+          - TRANSACTION_ALERT
+          - NETWORK_ALERT
+        minLength: 5
+        maxLength: 100
+       entityID:
+        type: string
+        description: Unique, consistent account/transaction or network identifier depending on the alertType, if account use IBAN following ISO 13616 where possible
+        example: GB98MIDL07009312345678
+        minLength: 5
+        maxLength: 100
+       decisionDate:
+        type: string
+        description: Date on which the decision was taken by the financial institution as perISO 8601.
+        example: '2017-07-21T17:32:28.001Z'
+        format: date-time
+       feedback:
+        type: string
+        description: The most recent feedback label received against this account alert
+        example: ACTIONED_MULE
+        enum:
+          - ACTIONED_MULE
+          - CONFIRMED_LEGITIMATE
+        minLength: 5
+        maxLength: 100
+    TraceFeedback:
+      type: object
+      required:
+        - feedbackID
+      properties:
+        feedbackID:
+          description: The unique ID of the feedback response.
+          type: string
+          example: 2b588f38d1bc40bf85fc91397bc98465
+          minLength: 1
+          maxLength: 100
+    TransactionIDMatchesBody:
+      type: object
+      required:
+        - service
+        - sourceID
+        - beneficiaryID
+        - transactionTime
+        - amount
+      properties:
+        service:
+          type: string
+          description: Code describing service that transaction is a part of.
+          example: FPS
+          enum:
+            - Bacs
+            - FPS
+          minLength: 3
+          maxLength: 4
+        sourceID:
+          type: string
+          description: Source account identifier
+          example: GB98MIDL07009312345678
+          minLength: 5
+          maxLength: 34
+          nullable: false
+        beneficiaryID:
+          type: string
+          description: Recipient of the payment
+          example: GB98MIDL07009312345678
+          minLength: 5
+          maxLength: 34
+          nullable: false
+        transactionTime:
+          type: string
+          description: Date time as per ISO 8601.
+          example: '2017-07-21T17:32:28.001Z'
+          format: date-time
+        amount:
+          type: integer
+          description: >-
+            The integer value of the payment in the fractional unit (e.g. pence,
+            cents) where used and in the main unit (e.g. krÃ³na) when fractional
+            units are not used.
+          example: 10034
+          format: int64
+          minimum: 1
+          maximum: 5000000000000
+    AccountIdentifierMatchAPI:
+      type: string
+      description: >-
+        Unique, consistent account identifier, ideally the IBAN following ISO
+        13616 where possible.
+      example: GB98MIDL07009312345678
+      minLength: 5
+      maxLength: 34
+      nullable: false
+    ValueMatchAPI:
+      type: integer
+      description: >-
+        The integer value of the payment in the fractional unit (e.g. pence,
+        cents) where used and in the main unit (e.g. krÃ³na) when fractional units
+        are not used.
+      example: 10034
+      format: int64
+      minimum: 1
+      maximum: 5000000000000
+    TransactionIdentifierMatchAPI:
+      type: string
+      description: Unique transaction identifier.
+      example: 2b588f38-d1bc-40bf-85fc-91397bc98465
+      minLength: 10
+      maxLength: 100
+    TransactionIDMatchesMatchAPI:
+      type: object
+      properties:
+        matchID:
+          type: string
+          description: Unique match identifier.
+          example: e99a18c428cb38d5f260853678922e03
+          minLength: 10
+          maxLength: 100
+        sourceID:
+          $ref: "#/components/schemas/AccountIdentifierMatchAPI"
+        beneficiaryID:
+          $ref: "#/components/schemas/AccountIdentifierMatchAPI"
+        refTime:
+          type: string
+          description: Time associated with a match as per ISO 8601.
+          example: '2017-07-21T17:32:28.001Z'
+          format: date-time
+        matches:
+          description: List of matched transactions.
+          type: array
+          items:
+           properties:
+            txnID:
+              $ref: "#/components/schemas/TransactionIdentifierMatchAPI"
+            time: 
+              type: string
+              description: Time associated with a transaction as per ISO 8601.
+              example: '2017-07-21T17:32:28.001Z'
+              format: date-time
+            amount:
+              $ref: "#/components/schemas/ValueMatchAPI"
+    AlertsMetadata:
+      type: object
+      properties:
+        totalRecords:
+          type: integer
+          description: The number of alerts available with the search
+          example: 505
+        displayedRecords:
+          type: integer
+          description: The number of alerts displayed in the response
+          example: 56
+        nextPaginationToken:
+          description: >-
+            Token which can be used with `pagination_token` to retrieve next set
+            of alerts
+          type: string
+          example: 'asc:1617275388000:2SKqogOYg2UQRnP1a4oJ66TFHcvfpZpt'
+          minLength: 1
+          maxLength: 256
+        previousPaginationToken:
+          description: >-
+            Token which can be used with `pagination_token` to retrieve previous
+            set of alerts
+          type: string
+          example: 'asc:1617275388000:2SKqogOYg2UQRnP1a4oJ66TFHcvfpZpt'
+          minLength: 1
+          maxLength: 256
+    EventIdentifierAlert:
+      type: string
+      description: Unique event identifier.
+      example: e99a18c428cb38d5f260853678922e03
+      minLength: 10
+      maxLength: 100
+    AccountIdentifierAlert:
+      type: string
+      description: >-
+        Unique, consistent account identifier, ideally the IBAN following ISO
+        13616 where possible.
+      example: GB98MIDL07009312345678
+      minLength: 5
+      maxLength: 34
+      nullable: false
+    TransactionIdentifierAlert:
+      type: string
+      description: Unique transaction identifier.
+      example: 2b588f38-d1bc-40bf-85fc-91397bc98465
+      minLength: 10
+      maxLength: 100
+    BankIdentifierAlert:
+      type: string
+      description: "Bank Identifier, can be Bank Identifier Code or Business Identifier Code (BIC) following ISO 9362; If this account is a source account, this field maps onto the pacs.008 FIToFICstmrCdtTrf/GrpHdr/InstgAgt for the first leg of the transaction. If this account is the destination account this field maps onto the FIToFICstmrCdtTrf/GrpHdr/InstdAgt for the final leg."
+      example: DEUTDEFF
+      minLength: 1
+      maxLength: 20
+    MuleScoreAlert:
+      type: number
+      description: The probability of an account being a money mule
+      example: 0.87
+      minimum: 0
+      maximum: 1
+    GenerationAlert:
+      type: integer
+      description: >-
+        The generation of an account relative to the start of a specific
+        dispersion. The account that receives the fraudulent funds from the victim
+        is generation 1.
+      example: 4
+      minimum: 1
+      maximum: 100
+    TraceTypeAlert:
+      type: string
+      description: >-
+        Description of the transaction, e.g. 'FRAUD', 'SUSPECT', 'RETRACTION',
+        'ROMANCE_SCAM', 'PURCHASE_SCAM','INVESTMENT_SCAM', 'INVOICE_SCAM',
+        'ADVANCE_FEE_SCAM', 'IMPERSONATION_SCAM','FAMILY_EMERGENCY_SCAM'
+      example: FRAUD
+      minLength: 5
+      maxLength: 100
+    FeedbackStatus:
+      type: string
+      description: >-
+        The most recent feedback label received against this account alert, e.g.
+        'ACTIONED_MULE', 'CONFIRMED_LEGITIMATE'
+      example: ACTIONED_MULE
+      minLength: 5
+      maxLength: 100
+    AccountAlert:
+      type: object
+      required:
+        - id
+        - networkAlertID
+        - accountID
+        - networkID
+        - owningBankID
+        - owningBankName
+        - time
+        - muleScore
+        - endpointFlag
+        - receivesSalary
+      description: A minimal account model containing additional alert properties
+      properties:
+        id:
+          type: string
+          description: Unique account alert identifier.
+          example: e99a18c428cb38d5f260853678922e03
+          minLength: 10
+          maxLength: 100
+        networkAlertID:
+          type: string
+          description: Unique network alert identifier.
+          example: e99a18c428cb38d5f260853678922e03
+          minLength: 10
+          maxLength: 100
+        accountID:
+          $ref: "#/components/schemas/AccountIdentifierAlert"
+        networkID:
+          type: string
+          description: Unique network identifier.
+          example: 2b588f38-d1bc-40bf-85fc-91397bc98465
+          minLength: 10
+          maxLength: 100
+        owningBankID:
+         $ref: "#/components/schemas/BankIdentifierAlert"
+        owningBankName:
+          type: string
+          description: Owning bank name - this is the bank that owns the account.
+          example: OwningBank
+          minLength: 1
+          maxLength: 100
+        time:
+          type: string
+          description: The time associated with the account alert as per ISO 8601.
+          example: '2017-07-21T17:32:28.001Z'
+          format: date-time
+        name:
+          type: string
+          description: Name against the account
+          example: Charlié Döe
+          minLength: 1
+          maxLength: 100
+        muleScore:
+          $ref: "#/components/schemas/MuleScoreAlert"
+        sourceTransactionValue:
+          type: integer
+          description: >-
+            The value of the source transaction in a dispersion network as the
+            integer value of the payment in the fractional unit (e.g. pence,cent)
+            where used and in the main unit (e.g. krÃ³na) when fractional units are not used.
+          example: 10034
+          format: int64
+          minimum: 1
+          maximum: 5000000000000
+        endpointFlag:
+          type: boolean
+          description: This account alert is an endpoint
+          example: true
+        numOutboundRelationships:
+          type: integer
+          description: >-
+            The number of outbound relationships of this account at the time of the
+            alert
+          example: 3
+          minimum: 0
+          maximum: 100
+        numInboundRelationships:
+          type: integer
+          description: >-
+            The number of inbound relationships of this account at the time of the
+            alert
+          example: 7
+          minimum: 0
+          maximum: 100
+        numScheduledMandates:
+          type: integer
+          description: >-
+            The number of scheduled mandates associated with this account at the time
+            of the alert
+          example: 2
+          minimum: 0
+          maximum: 100
+        firstAppearance:
+          type: string
+          description: The first time we observed this account in a dispersion
+          example: '2017-07-21T17:32:28.001Z'
+          format: date-time
+        mostRecentAppearance:
+          type: string
+          description: >-
+            The most recent time we observed this account in a dispersion, before this
+            alert
+          example: '2017-07-21T17:32:28.001Z'
+          format: date-time
+        firstTransactionTime:
+          type: string
+          description: The time of the first transaction ever seen associated with this account
+          example: '2017-07-21T17:32:28.001Z'
+          format: date-time
+        mostRecentTransactionTime:
+          type: string
+          description: >-
+            The time of the most recent transaction seen associated with this account
+            relative to the time of the alert
+          example: '2017-07-21T17:32:28.001Z'
+          format: date-time
+        receivesSalary:
+          type: boolean
+          description: 'If true, this account is known to receive a salary'
+          example: true
+        dwellTime:
+          type: string
+          description: >-
+            If appropriate, the dwell time is the amount of time that funds spent in
+            this account during the dispersion that generated this alert. If this
+            account was a source of funds or an endpoint then this field will be
+            blank. This field is formatted as an ISO8601 duration.
+          example: P3Y6M4DT12H30M5S
+          pattern: >-
+            ^P(?!$)(\\d+(?:\\.\\d+)?Y)?(\\d+(?:\\.\\d+)?M)?(\\d+(?:\\.\\d+)?W)?(\\d+(?:\\.\\d+)?D)?(T(?=\\d)(\\d+(?:\\.\\d+)?H)?(\\d+(?:\\.\\d+)?M)?(\\d+(?:\\.\\d+)?S)?)?$
+        numNetworks:
+          type: integer
+          description: >-
+            The number of dispersion networks we have seen this account be a part of,
+            including the dispersion that caused this alert
+          example: 3
+          maximum: 1000
+          minimum: 1
+        numTracedNetworks:
+          type: integer
+          description: The number of traced dispersion networks this account has been a part of
+          example: 2
+          maximum: 1000
+          minimum: 1
+        generation:
+          $ref: "#/components/schemas/GenerationAlert"
+        traceType:
+          $ref: "#/components/schemas/TraceTypeAlert"
+        totalSuspiciousValueInbound:
+          type: integer
+          description: >-
+            The total value of suspicious funds that have been sent to this account as
+            the integer value of the payment in the fractional unit (e.g. pence,
+            cents) where used and in the main unit (e.g. krÃ³na) when fractional units
+            are not used.
+          example: 10034
+          format: int64
+          minimum: 1
+          maximum: 5000000000000
+        totalSuspiciousValueOutbound:
+          type: integer
+          description: >-
+            The total value of suspicious funds that have been sent from this account
+            as the integer value of the payment in the fractional unit (e.g. pence,
+            cents) where used and in the main unit (e.g. krÃ³na) when fractional units
+            are not used.
+          example: 10034
+          format: int64
+          minimum: 1
+          maximum: 5000000000000
+        totalValueInbound:
+          type: integer
+          description: >-
+            The total value of funds that have been sent to this account over last 13
+            months as the integer value of the payment in the fractional unit (e.g.
+            pence, cents) where used and in the main unit (e.g. krÃ³na) when
+            fractional units are not used.
+          example: 10034
+          format: int64
+          minimum: 1
+          maximum: 5000000000000
+        totalValueOutbound:
+          type: integer
+          description: >-
+            The total value of funds that have been sent from this account over last
+            13 months as the integer value of the payment in the fractional unit (e.g.
+            pence, cents) where used and in the main unit (e.g. krÃ³na) when
+            fractional units are not used.
+          example: 10034
+          format: int64
+          minimum: 1
+          maximum: 5000000000000
+        generations:
+          type: array
+          items:
+            type: integer
+            minimum: 1
+            maximum: 100
+          description: >-
+              The generations that this account has appeared in across all the other
+              dispersion networks it has occurred in
+          example:
+              - 1
+              - 1
+              - 2
+              - 3
+              - 3
+              - 3
+        mostRecentFeedback:
+          $ref: "#/components/schemas/FeedbackStatus"
+        parentAlertID:
+          type: string
+          description: Reference to the original alertID on which feedback was based
+          example: e99a18c428cb38d5f260853678922e03
+          minLength: 10
+          maxLength: 1000
+        decisionDate:
+          type: string
+          description: Date on which the decision was taken by the financial institution
+          example: '2017-07-21T17:32:28.001Z'
+          format: date-time
+    AccountAlerts:
+      allOf:
+        - $ref: "#/components/schemas/AlertsMetadata"
+        - type: object
+      properties:
+        alerts: 
+         description: List of account alerts
+        items: 
+         $ref: "#/components/schemas/AccountAlert"
+    ValueAlert:
+      type: integer
+      description: >-
+        The integer value of the payment in the fractional unit (e.g. pence,
+        cents) where used and in the main unit (e.g. krÃ³na) when fractional units
+        are not used.
+      example: 10034
+      format: int64
+      minimum: 1
+      maximum: 9223372036854776000
+    TransactionAlert:
+      type: object
+      required:
+        - networkAlertID
+        - networkID
+        - time
+        - txnTime
+        - sourceID
+        - destID
+        - sourceBankID
+        - destBankID
+        - value
+      description: A minimal transaction model containing additional alert properties.
+      properties:
+        id:
+          type: string
+          description: Unique transaction alert identifier.
+          example: e99a18c428cb38d5f260853678922e03
+          minLength: 10
+          maxLength: 100
+        txnID:
+          type: string
+          description: Unique transaction identifier.
+          example: 2b588f38-d1bc-40bf-85fc-91397bc98465
+          minLength: 10
+          maxLength: 100
+        networkAlertID:
+          type: string
+          description: Unique network alert identifier.
+          example: e99a18c428cb38d5f260853678922e03
+          minLength: 10
+          maxLength: 100
+        networkID:
+          type: string
+          description: Unique network identifier.
+          example: 2b588f38-d1bc-40bf-85fc-91397bc98465
+          minLength: 10
+          maxLength: 100
+        time:
+          type: string
+          description: The time associated with the transaction alert as per ISO 8601.
+          example: '2017-07-21T17:32:28.001Z'
+          format: date-time
+        txnTime:
+          type: string
+          description: The time associated with the transaction as per ISO 8601.
+          example: '2017-07-21T17:32:28.001Z'
+          format: date-time
+        sourceID:
+          $ref: "#/components/schemas/AccountIdentifierAlert"
+        destID:
+          $ref: "#/components/schemas/AccountIdentifierAlert"
+        sourceBankID:
+          $ref: "#/components/schemas/BankIdentifierAlert"
+        sourceBankName:
+          type: string
+          description: Source bank name - this is the bank that owns the source account.
+          example: Barclays
+          minLength: 1
+          maxLength: 100
+        destBankID:
+          $ref: "#/components/schemas/BankIdentifierAlert"
+        destBankName:
+          type: string
+          description: >-
+            Destination bank name - this is the bank that owns the destination
+            account.
+          example: Lloyds
+          minLength: 1
+          maxLength: 100
+        value:
+          $ref: "#/components/schemas/ValueAlert"
+        remitInfo:
+          type: string
+          description: >-
+            Remittance information as entered by the sender of the transaction. This
+            field maps onto pacs.008
+            /FIToFICstmrCdtTrf/CdtTrfTxInf/RltdRmtInf/RmtInf/Ustrd/ in the ISO20002
+            standard. See
+            https://www.iso20022.org/standardsrepository/type/RemittanceInformation16
+            for further information.
+          example: rent 10 Main St
+          minLength: 1
+          maxLength: 140
+        generation:
+          type: integer
+          description:
+            "The generation the destination account appeared in the dispersion network that caused this alert relative to the start of the dispersion.The account that receives the fraudulent funds from the victim is generation 1"
+          example: 4
+          minimum: 1
+          maximum: 100
+        currency:
+          type: string
+          description: The currency of the transaction based on a subset of ISO 4217.
+          example: GBP
+          minLength: 3
+          maxLength: 3
+        service:
+          type: string
+          description: 'The service used for the payment, e.g. ''Bacs'', ''FPS'''
+          example: FPS
+          minLength: 2
+          maxLength: 10
+        dwellTime:
+          type: string
+          description: >-
+              The amount of time that funds spent in the source account before the
+              transaction associated with this alert. This field will only be
+              populated if this alert was generated as part of a dispersion, and is
+              formatted as an ISO8601 duration.
+          example: P3Y6M4DT12H30M5S
+          pattern: >-
+              ^P(?!$)(\\d+(?:\\.\\d+)?Y)?(\\d+(?:\\.\\d+)?M)?(\\d+(?:\\.\\d+)?W)?(\\d+(?:\\.\\d+)?D)?(T(?=\\d)(\\d+(?:\\.\\d+)?H)?(\\d+(?:\\.\\d+)?M)?(\\d+(?:\\.\\d+)?S)?)?$
+        traceType:
+          $ref: "#/components/schemas/TraceTypeAlert"
+        muleScore:
+          $ref: "#/components/schemas/MuleScoreAlert"
+        parentAlertID:
+          type: string
+          description: Reference to the original alertID on which feedback was based
+          example: e99a18c428cb38d5f260853678922e03
+          minLength: 10
+          maxLength: 100
+        decisionDate:
+          type: string
+          description: Date on which the decision was taken by the financial institution
+          example: '2017-07-21T17:32:28.001Z'
+          format: date-time
+        mostRecentFeedback:
+          $ref: "#/components/schemas/FeedbackStatus"
+    TransactionAlerts:
+      allOf:
+        - $ref: "#/components/schemas/AlertsMetadata"
+        - type: object
+      properties:
+        alerts: 
+         description: List of transaction alerts
+         items: 
+          $ref: "#/components/schemas/TransactionAlert"
+    NetworkAlert:
+      type: object
+      required:
+        - id
+        - time
+        - networkID
+      description: Response data model for network alerts
+      properties:
+        id: 
+         $ref: "#/components/schemas/EventIdentifierAlert"
+        time:
+         type: string
+         example: '2017-07-21T17:32:28.001Z'
+         format: date-time
+         description: The alert time
+        networkID:
+          $ref: "#/components/schemas/TransactionIdentifierAlert"
+        transactionAlerts:
+          type: array
+          description: List of transaction alerts
+          items:
+            $ref: "#/components/schemas/TransactionAlert"
+        accountAlerts:
+          type: array
+          description: List of account alerts
+          items:
+            $ref: "#/components/schemas/AccountAlert"
+        vizURL:
+          type: string
+          format: uri
+          description: URL of the dispersion network visualisation.
+          example: >-
+            https://api.fcs.uk.mastercard.com/trace/financialcrime/viz/d41d8cd98f00b204e9800998ecf8427e
+          minLength: 12
+          maxLength: 200
+        sourceTxnID:
+          type: string
+          description: Unique source transaction identifier.
+          example: 2b588f38-d1bc-40bf-85fc-91397bc98465
+          minLength: 10
+          maxLength: 100
+        sourceTxnType:
+           $ref: "#/components/schemas/TraceTypeAlert"
+        length:
+          type: integer
+          description: >-
+            The length of dispersion network, defined as the number of transactions in
+            the dispersion network.
+          example: 20
+          minimum: 1
+          maximum: 1000
+        generations:
+          type: integer
+          description: The number of generations in the dispersion network.
+          example: 3
+          minimum: 1
+          maximum: 10
+        totalValue:
+          type: integer
+          description: >-
+            The total value of all the transactions in the dispersion network as the
+            integer value of payment in the fractional unit (e.g. pence, cents) where
+            used and in the main unit (e.g. krÃ³na) when fractional units are not
+            used.
+          example: 10034
+          format: int64
+          minimum: 1
+          maximum: 9223372036854776000
+        sourceValue:
+          type: integer
+          description: >-
+            The source value of a dispersion network as the integer value of payment
+            in the fractional unit (e.g. pence, cents) where used and in the main unit
+            (e.g. krÃ³na) when fractional units are not used.
+          example: 10034
+          format: int64
+          minimum: 1
+          maximum: 5000000000000
+        uniqueAccounts:
+          type: integer
+          description: The number of unique accounts in this dispersion network.
+          example: 16
+          minimum: 2
+          maximum: 100
+        meanDwellTime:
+          type: string
+          description: >-
+            The average (mean) time funds remain in intermediary accounts in this
+            dispersion network specified as an ISO8601 duration string.
+          example: P3Y6M4DT12H30M5S
+          pattern: >-
+            ^P(?!$)(\\d+(?:\\.\\d+)?Y)?(\\d+(?:\\.\\d+)?M)?(\\d+(?:\\.\\d+)?W)?(\\d+(?:\\.\\d+)?D)?(T(?=\\d)(\\d+(?:\\.\\d+)?H)?(\\d+(?:\\.\\d+)?M)?(\\d+(?:\\.\\d+)?S)?)?$
+        medianDwellTime:
+          type: string
+          description: >-
+            The average (median) time funds remain in intermediary accounts in this
+            dispersion network specified as an ISO8601 duration string.
+          example: P3Y6M4DT12H30M5S
+          pattern: >-
+            ^P(?!$)(\\d+(?:\\.\\d+)?Y)?(\\d+(?:\\.\\d+)?M)?(\\d+(?:\\.\\d+)?W)?(\\d+(?:\\.\\d+)?D)?(T(?=\\d)(\\d+(?:\\.\\d+)?H)?(\\d+(?:\\.\\d+)?M)?(\\d+(?:\\.\\d+)?S)?)?$
+        meanMuleScore:
+          type: number
+          description: The average (mean) mule score of accounts in this dispersion network.
+          example: 0.845
+          minimum: 0
+          maximum: 1
+        elapsedTime:
+          type: string
+          description: >-
+            The amount of time this dispersion took, from the earliest transaction to
+            the last transaction specified as an ISO8601 duration string
+          example: P3Y6M4DT12H30M5S
+          pattern: >-
+            ^P(?!$)(\\d+(?:\\.\\d+)?Y)?(\\d+(?:\\.\\d+)?M)?(\\d+(?:\\.\\d+)?W)?(\\d+(?:\\.\\d+)?D)?(T(?=\\d)(\\d+(?:\\.\\d+)?H)?(\\d+(?:\\.\\d+)?M)?(\\d+(?:\\.\\d+)?S)?)?$
+        numActionedMules:
+          type: integer
+          description: The number of actioned mules in this dispersion network.
+          example: 2
+          minimum: 0
+          maximum: 100
+        numLegitimate:
+          type: integer
+          description: The number of confirmed legitimate accounts in this dispersion network.
+          example: 7
+          minimum: 0
+          maximum: 100
+        numNotInvestigated:
+          type: integer
+          description: "The number of accounts in this dispersion network that have not been investigated"
+          example: 3
+          minimum: 0
+          maximum: 100
+        parentAlertID:
+          type: string
+          description: Reference to the original alertID on which feedback was based.
+          example: e99a18c428cb38d5f260853678922e03
+          minLength: 10
+          maxLength: 100
+        decisionDate:
+          type: string
+          description: >-
+            Time at which the decision was taken by the financial institution as per ISO 8601.
+          example: '2017-07-21T17:32:28.001Z'
+          format: date-time
+        mostRecentFeedback:
+          type: string
+          description: >-
+              The most recent feedback label received against this account alert, e.g.
+              'ACTIONED_MULE', 'CONFIRMED_LEGITIMATE'
+          example: ACTIONED_MULE
+          minLength: 5
+          maxLength: 100
+    NetworkAlerts:
+      allOf:
+        - $ref: "#/components/schemas/AlertsMetadata"
+        - type: object
+      properties:
+        alerts: 
+         description: "List of dispersion network alerts"
+         items: 
+          $ref: "#/components/schemas/NetworkAlert"
+    TransactionIdentifierTrace:
+      type: string
+      description: "Unique transaction identifier, prepend with match if an outbound transaction."
+      example: "2b588f38-d1bc-40bf-85fc-91397bc98465"
+      minLength: 10
+      maxLength: 100
+    TraceTypeTrace:
+      type: string
+      description: "Description of the transaction, e.g. FRAUD, SUSPECT, RETRACTION,ROMANCE_SCAM, PURCHASE_SCAM,INVESTMENT_SCAM, INVOICE_SCAM,ADVANCE_FEE_SCAM, IMPERSONATION_SCAM,FAMILY_EMERGENCY_SCAM"
+      example: FRAUD
+      minLength: 5
+      maxLength: 100
+    EventIdentifierTrace:
+      type: string
+      description: Unique event identifier.
+      example: e99a18c428cb38d5f260853678922e03
+      minLength: 10
+      maxLength: 100
+    TracedNetworks:
+      description: List of traced networks.
+      type: array
+      items:
+        $ref: "#/components/schemas/TracedNetwork"
+    TracedNetwork:
+      description: A single traced network.
+      type: object
+      required:
+        - id
+        - time
+        - networkID
+        - transactionAlerts
+        - accountAlerts
+        - vizURL
+        - sourceTxnID
+        - sourceTxnType
+        - length
+        - generations
+        - totalValue
+        - sourceValue
+        - uniqueAccounts
+        - meanDwellTime
+        - medianDwellTime
+        - meanMuleScore
+        - elapsedTime
+        - numActionedMules
+        - numLegitimate
+        - numNotInvestigated
+        - parentAlertID
+        - decisionDate
+        - mostRecentFeedback
+      properties:
+        id:
+          type: string
+          description: Unique request identifier.
+          example: e99a18c428cb38d5f260853678922e03
+          minLength: 10
+          maxLength: 100
+        time:
+          type: "string"
+          description: "The time associated with the traced network alert as per ISO 8601."
+          example: "2017-07-21T17:32:28.001Z"  
+        networkID:
+          type: string
+          description: Unique network identifier.
+          example: 2b588f38-d1bc-40bf-85fc-91397bc98465
+          minLength: 10
+          maxLength: 100
+        transactionAlerts:
+          type: array
+          items:
+            $ref: "#/components/schemas/TransactionAlertBasicTrace"
+        accountAlerts:
+          type: array
+          items:
+            $ref: "#/components/schemas/AccountAlertBasicTrace"
+        vizURL:
+          type: string
+          format: uri
+          description: URL of the dispersion network visualisation.
+          example: >-
+            https://api.fcs.uk.mastercard.com/trace/financialcrime/viz/d41d8cd98f00b204e9800998ecf8427e
+          minLength: 12
+          maxLength: 200
+        sourceTxnID:
+          type: string
+          description: Unique source transaction identifier.
+          example: 2b588f38-d1bc-40bf-85fc-91397bc98465
+          minLength: 10
+          maxLength: 100
+        sourceTxnType:
+          $ref: "#/components/schemas/TraceTypeTrace"
+        length: 
+          type: integer
+          description: >-
+            The length of dispersion network, defined as the number of transactions
+            in the dispersion network.
+          example: 20
+          minimum: 1
+          maximum: 1000
+        generations:
+          type: integer
+          description: The number of generations in the dispersion network.
+          example: 3
+          minimum: 1
+          maximum: 10
+        totalValue:
+          type: integer
+          description: >-
+            The total value of all the transactions in the dispersion network as the
+            integer value of payment in the fractional unit (e.g. pence, cents)
+            where used and in the main unit (e.g. krÃ³na) when fractional units are
+            not used.
+          example: 10034
+          format: int64
+          minimum: 1
+          maximum: 9223372036854776000
+        sourceValue:
+          type: integer
+          description: >-
+            The source value of a dispersion network as the integer value of payment
+            in the fractional unit (e.g. pence, cents) where used and in the main
+            unit (e.g. krÃ³na) when fractional units are not used.
+          example: 10034
+          format: int64
+          minimum: 1
+          maximum: 9223372036854776000
+        uniqueAccounts:
+          type: integer
+          description: The number of unique accounts in this dispersion network.
+          example: 16
+          minimum: 2
+          maximum: 100
+        meanDwellTime:
+          type: string
+          description: >-
+            The average (mean) time funds remain in intermediary accounts in this
+            dispersion network specified as an ISO8601 duration string.
+          example: P3Y6M4DT12H30M5S
+          pattern: >-
+            ^P(?!$)(\\d+(?:\\.\\d+)?Y)?(\\d+(?:\\.\\d+)?M)?(\\d+(?:\\.\\d+)?W)?(\\d+(?:\\.\\d+)?D)?(T(?=\\d)(\\d+(?:\\.\\d+)?H)?(\\d+(?:\\.\\d+)?M)?(\\d+(?:\\.\\d+)?S)?)?$
+        medianDwellTime:
+          type: string
+          description: >-
+            The average (median) time funds remain in intermediary accounts in this
+            dispersion network specified as an ISO8601 duration string.
+          example: P3Y6M4DT12H30M5S
+          pattern: >-
+            ^P(?!$)(\\d+(?:\\.\\d+)?Y)?(\\d+(?:\\.\\d+)?M)?(\\d+(?:\\.\\d+)?W)?(\\d+(?:\\.\\d+)?D)?(T(?=\\d)(\\d+(?:\\.\\d+)?H)?(\\d+(?:\\.\\d+)?M)?(\\d+(?:\\.\\d+)?S)?)?$
+        meanMuleScore:
+          type: number
+          description: The average (mean) mule score of accounts in this dispersion network.
+          example: 0.845
+          minimum: 0
+          maximum: 1
+        elapsedTime:
+          type: string
+          description: >-
+            The amount of time this dispersion took, from the earliest transaction
+            to the last transaction specified as an ISO8601 duration string
+          example: P3Y6M4DT12H30M5S
+          pattern: >-
+            ^P(?!$)(\\d+(?:\\.\\d+)?Y)?(\\d+(?:\\.\\d+)?M)?(\\d+(?:\\.\\d+)?W)?(\\d+(?:\\.\\d+)?D)?(T(?=\\d)(\\d+(?:\\.\\d+)?H)?(\\d+(?:\\.\\d+)?M)?(\\d+(?:\\.\\d+)?S)?)?$
+        numActionedMules:
+          type: integer
+          description: The number of actioned mules in this dispersion network.
+          example: 2
+          minimum: 0
+          maximum: 100
+        numLegitimate:
+          type: integer
+          description: The number of confirmed legitimate accounts in this dispersion network.
+          example: 7
+          minimum: 0
+          maximum: 100
+        numNotInvestigated:
+          type: integer
+          description: >-
+            The number of accounts in this dispersion network that have not been
+            investigated.
+          example: 3
+          minimum: 0
+          maximum: 100
+        parentAlertID:
+          type: string
+          description: Reference to the original alertID on which feedback was based.
+          example: e99a18c428cb38d5f260853678922e03
+          minLength: 10
+          maxLength: 100
+        decisionDate:
+          type: string
+          description: >-
+            Time at which the decision was taken by the financial institution as per
+            ISO 8601.
+          example: '2017-07-21T17:32:28.001Z'
+          format: date-time
+        mostRecentFeedback:
+          type: string
+          description: >-
+            The most recent feedback label received against this account alert, e.g.
+            'ACTIONED_MULE', 'CONFIRMED_LEGITIMATE'
+          example: ACTIONED_MULE
+          minLength: 5
+          maxLength: 100
+    TransactionAlertBasicTrace:
+      type: object
+      description: A minimal transaction model containing additional alert properties.
+      required:
+          - id
+          - txnID
+          - networkAlertID
+          - networkID
+          - time
+          - txnTime
+          - sourceID
+          - destID
+          - sourceBankID
+          - sourceBankName
+          - destBankID
+          - destBankName
+          - value
+      properties:
+        id:
+          type: string
+          description: Unique transaction alert identifier.
+          example: e99a18c428cb38d5f260853678922e03
+          minLength: 10
+          maxLength: 100
+        txnID:
+          type: string
+          description: Unique transaction identifier.
+          example: 2b588f38-d1bc-40bf-85fc-91397bc98465
+          minLength: 10
+          maxLength: 100
+        networkAlertID:
+          type: string
+          description: Unique network alert identifier.
+          example: e99a18c428cb38d5f260853678922e03
+          minLength: 10
+          maxLength: 100
+        networkID:
+          type: string
+          description: Unique network identifier.
+          example: 2b588f38-d1bc-40bf-85fc-91397bc98465
+          minLength: 10
+          maxLength: 100
+        time:
+          type: string
+          description: The time associated with the transaction alert as per ISO 8601.
+          example: '2017-07-21T17:32:28.001Z'
+          format: date-time
+        txnTime:
+          type: string
+          description: The time associated with the transaction as per ISO 8601.
+          example: '2017-07-21T17:32:28.001Z'
+          format: date-time
+        sourceID:
+          $ref: "#/components/schemas/AccountIdentifierTrace"
+        destID:
+          $ref: "#/components/schemas/AccountIdentifierTrace"
+        sourceBankID:
+          $ref: "#/components/schemas/BankIdentifierTrace"
+        sourceBankName:
+          type: string
+          description: Source bank name - this is the bank that owns the source account.
+          example: Barclays
+          minLength: 1
+          maxLength: 100
+        destBankID:
+          $ref: "#/components/schemas/BankIdentifierAlert"
+        destBankName:
+          type: string
+          description: >-
+              Destination bank name - this is the bank that owns the destination
+              account.
+          example: Lloyds
+          minLength: 1
+          maxLength: 100
+        value:
+          $ref: "#/components/schemas/ValueTrace"
+    AccountAlertBasicTrace:
+      type: object
+      description: A minimal account model containing additional alert properties.
+      required:
+            - id
+            - networkAlertID
+            - accountID
+            - networkID
+            - owningBankID
+            - owningBankName
+            - time
+      properties:
+        id:
+          type: string
+          description: Unique account alert identifier.
+          example: e99a18c428cb38d5f260853678922e03
+          minLength: 10
+          maxLength: 100
+        networkAlertID:
+          type: string
+          description: Unique network alert identifier.
+          example: e99a18c428cb38d5f260853678922e03
+          minLength: 10
+          maxLength: 100
+        accountID:
+          $ref: "#/components/schemas/AccountIdentifierTrace"
+        networkID:
+          type: string
+          description: Unique network identifier.
+          example: 2b588f38-d1bc-40bf-85fc-91397bc98465
+          minLength: 10
+          maxLength: 100
+        owningBankID:
+          $ref: "#/components/schemas/BankIdentifierTrace"
+        owningBankName:
+          type: string
+          description: Owning bank name - this is the bank that owns the account.
+          example: OwningBank
+          minLength: 1
+          maxLength: 100
+        time:
+          type: string
+          description: The time associated with the account alert as per ISO 8601.
+          example: '2017-07-21T17:32:28.001Z'
+          format: date-time
+    AccountIdentifierTrace:
+      type: string
+      description: >-
+            Unique, consistent account identifier, ideally the IBAN following ISO
+            13616 where possible.
+      example: GB98MIDL07009312345678
+      minLength: 5
+      maxLength: 34
+      nullable: false
+    BankIdentifierTrace:
+      type: string
+      description: >-
+            Bank Identifier, can be Bank Identifier Code, e.g 1 or Business
+            Identifier Code (BIC) following ISO 9362; If this account is a source
+            account, this field maps onto the pacs.008
+            FIToFICstmrCdtTrf/GrpHdr/InstgAgt for the first leg of the
+            transaction. If this account is the destination account this field
+            maps onto the FIToFICstmrCdtTrf/GrpHdr/InstdAgt for the final leg.
+      example: DEUTDEFF
+      minLength: 1
+      maxLength: 20
+    ValueTrace:
+      type: integer
+      description: >-
+            The integer value of the payment in the fractional unit (e.g. pence,
+            cents) where used and in the main unit (e.g. krÃ³na) when fractional
+            units are not used.
+      example: 10034
+      format: int64
+      minimum: 1
+      maximum: 5000000000000
+    VizFormatTrace:
+      type: string
+      enum:
+        - SVG
+        - PDF
+      default: SVG
+      example: SVG
+    VizWidthTrace:
+      type: integer
+      format: int64
+      default: 1280
+      example: 1280
+    VizHeightTrace:
+      type: integer
+      format: int64
+      default: 720
+      example: 720
+    VizLegendTrace:
+      type: boolean
+      default: true
+      example: true
+    VizAxisTrace:
+      type: string
+      default: SEQ
+      enum:
+       - TIME
+       - SEQ
+       - GEN
+      example: SEQ
+    VizColourTrace:
+      type: string
+      default: LIGHT
+      enum:
+       - LIGHT
+       - DARK
+      example: LIGHT
+    BadRequest:
+      properties:
+        code:
+          type: string
+        message:
+          type: string  
+  examples:    
+    UnauthorisedExample:
+      value: 
+        Errors: 
+          Error:
+            Source: Gateway
+            ReasonCode: Unauthorised
+            Description: Invalid API key provided
+            Recoverable: false
+            Details: null
+    RateLimitExample:
+      value: 
+        Errors: 
+          Error:
+            Source: Gateway
+            ReasonCode: RATE_LIMIT_EXCEEDED
+            Description: You have exceeded the service rate limit.
+            Recoverable: true
+            Details: null
+    NotFoundExample:
+      value: 
+        Errors: 
+          Error:
+            Source: Gateway
+            ReasonCode: NOT_FOUND
+            Description: URL not found
+            Recoverable: false
+            Details: null
+    AccessForbiddenExample:
+      value: 
+        Errors: 
+          Error:
+            Source: Gateway
+            ReasonCode: PERMISSION_DENIED
+            Description: Invalid customer for third party
+            Recoverable: false
+            Details: null
+    BadRequestExampleFeedback:
+      value: 
+        Errors: 
+          Error:
+            Source: FEEDBACK_FINANCIAL_CRIME
+            ReasonCode: BAD_REQUEST
+            Description: We could not handle your request
+            Recoverable: false
+            Details: The request body is expecting an array
+    AlertIdNotFoundExampleFeedback:
+      value: 
+        Errors: 
+          Error:
+            Source: FEEDBACK_FINANCIAL_CRIME
+            ReasonCode: NOT_FOUND
+            Description: Alert ID not found in our records
+            Recoverable: false
+            Details: Alert ID is valid but is not present in our records
+    MethodNotAllowedExampleFeedback:
+      value: 
+        Errors: 
+          Error:
+            Source: FEEDBACK_FINANCIAL_CRIME
+            ReasonCode: METHOD_NOT_ALLOWED
+            Description: Only POST method allowed
+            Recoverable: false
+            Details: null
+    ConflictExampleFeedback:
+      value: 
+       Errors: 
+          Error:
+            Source: FEEDBACK_FINANCIAL_CRIME
+            ReasonCode: CONFLICT
+            Description: Alert ID does not match the specified entity
+            Recoverable: false
+            Details: null
+    UnsupportedMediaTypeExampleFeedback:
+      value: 
+        Errors: 
+        Error:
+          Source: FEEDBACK_FINANCIAL_CRIME
+          ReasonCode: UNSUPPORTED_MEDIA_TYPE
+          Description: Unsupported media type
+          Recoverable: false
+          Details: >-
+            The request media type 'application/x-www-form-urlencoded' is not
+            supported by this resource
+    UnprocessableEntityExampleFeedback:
+      value: 
+        Errors: 
+        Error:
+          Source: FEEDBACK_FINANCIAL_CRIME
+          ReasonCode: UNPROCESSABLE_ENTITY
+          Description: Expects a single json object and not an array
+          Recoverable: false
+          Details: null
+    ConsumerForbiddenExampleFeedback:
+      value: 
+        Errors: 
+        Error:
+          Source: FEEDBACK_FINANCIAL_CRIME
+          ReasonCode: PERMISSION_DENIED
+          Description: Invalid permission set
+          Recoverable: false
+          Details: >-
+            Consumer ${client.name} does not have permission to access the account
+            requested
+    ConsumerForbiddenNotFoundExampleFeedback:
+      value: 
+        Errors: 
+        Error:
+          Source: FEEDBACK_FINANCIAL_CRIME
+          ReasonCode: PERMISSION_DENIED
+          Description: Sort Code not found in our records
+          Recoverable: false
+          Details: >-
+            Consumer ${client.name} does not have permission to access the account
+            requested
+    BadRequestExampleMatchAPI:
+      value: 
+        Errors: 
+        Error:
+          Source: MATCH_FINANCIAL_CRIME
+          ReasonCode: BAD_REQUEST
+          Description: We could not handle your request
+          Recoverable: false
+          Details: The request body is expecting an array
+    MethodNotAllowedExampleMatchAPI:
+      value: 
+        Errors: 
+        Error:
+          Source: MATCH_FINANCIAL_CRIME
+          ReasonCode: METHOD_NOT_ALLOWED
+          Description: Only POST method allowed
+          Recoverable: false
+          Details: null
+    ConsumerForbiddenExampleMatchAPI:
+      value: 
+        Errors: 
+        Error:
+          Source: MATCH_FINANCIAL_CRIME
+          ReasonCode: PERMISSION_DENIED
+          Description: Invalid permission set
+          Recoverable: false
+          Details: Client identifier (X-Consumer-Custom-ID) header cannot be empty
+    ConsumerForbiddenNotFoundExampleMatchAPI:
+      value: 
+        Errors: 
+        Error:
+          Source: MATCH_FINANCIAL_CRIME
+          ReasonCode: PERMISSION_DENIED
+          Description: Sort Code not found in our records
+          Recoverable: false
+          Details: >-
+            Consumer ${client.name} does not have permission to access the account
+            requested
+    UnsupportedMediaTypeExampleMatchAPI:
+      value: 
+        Errors: 
+        Error:
+          Source: MATCH_FINANCIAL_CRIME
+          ReasonCode: UNSUPPORTED_MEDIA_TYPE
+          Description: Unsupported media type
+          Recoverable: false
+          Details: >-
+            The request media type 'application/x-www-form-urlencoded' is not
+            supported by this resource
+    UnprocessableEntityExampleMatchAPI:
+      value: 
+        Errors: 
+        Error:
+          Source: MATCH_FINANCIAL_CRIME
+          ReasonCode: UNPROCESSABLE_ENTITY
+          Description: Expects a single json object and not an array
+          Recoverable: false
+          Details: null
+    BadRequestExampleAlert:
+      value: 
+        Errors: 
+        Error:
+          Source: ALERT_FINANCIAL_CRIME
+          ReasonCode: BAD_REQUEST
+          Description: We could not handle your request
+          Recoverable: false
+          Details: The request contains a bad payload
+    AlertIdNotFoundExampleAlert:
+      value: 
+        Errors: 
+        Error:
+          Source: ALERT_FINANCIAL_CRIME
+          ReasonCode: NOT_FOUND
+          Description: Alert ID not found in our records
+          Recoverable: false
+          Details: Alert ID is valid but is not present in our records
+    MethodNotAllowedExampleAlert:
+      value: 
+        Errors: 
+        Error:
+          Source: ALERT_FINANCIAL_CRIME
+          ReasonCode: METHOD_NOT_ALLOWED
+          Description: Only POST method allowed
+          Recoverable: false
+          Details: null
+    ConsumerForbiddenExampleAlert:
+      value:
+        Errors: 
+        Error:
+          Source: ALERT_FINANCIAL_CRIME
+          ReasonCode: PERMISSION_DENIED
+          Description: Invalid permission set
+          Recoverable: false
+          Details: >-
+            Consumer ${client.name} does not have permission to access the account
+            requested
+    ConsumerForbiddenNotFoundExampleAlert:
+      value: 
+        Errors: 
+        Error:
+          Source: ALERT_FINANCIAL_CRIME
+          ReasonCode: PERMISSION_DENIED
+          Description: Sort Code not found in our records
+          Recoverable: false
+          Details: >-
+            Consumer ${client.name} does not have permission to access the account
+            requested
+    BadRequestExampleTrace:
+      value: 
+        Errors: 
+        Error:
+          Source: TRACE_FINANCIAL_CRIME
+          ReasonCode: BAD_REQUEST
+          Description: We could not handle your request
+          Recoverable: false
+          Details: The request contains a bad payload
+    ConsumerForbiddenExampleTrace:
+      value: 
+        Errors: 
+        Error:
+          Source: TRACE_FINANCIAL_CRIME
+          ReasonCode: PERMISSION_DENIED
+          Description: Invalid permission set
+          Recoverable: false
+          Details: >-
+            Consumer ${client.name} does not have permission to access the account
+            requested
+    ConsumerForbiddenNotFoundExampleTrace:
+      value: 
+        Errors: 
+        Error:
+          Source: TRACE_FINANCIAL_CRIME
+          ReasonCode: PERMISSION_DENIED
+          Description: Sort Code not found in our records
+          Recoverable: false
+          Details: >-
+            Consumer ${client.name} does not have permission to access the account
+            requested
+    TransactionNotFoundExampleTrace:
+      value: 
+        Errors: 
+        Error:
+          Source: TRACE_FINANCIAL_CRIME
+          ReasonCode: NOT_FOUND
+          Description: Transaction ID not found in our records
+          Recoverable: false
+          Details: Transaction ID is valid but is not present in our records
+    MethodNotAllowedExampleTrace:
+      value: 
+        Errors: 
+        Error:
+          Source: TRACE_FINANCIAL_CRIME
+          ReasonCode: METHOD_NOT_ALLOWED
+          Description: Only POST method allowed
+          Recoverable: false
+          Details: null
